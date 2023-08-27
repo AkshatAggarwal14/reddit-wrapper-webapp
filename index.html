@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reddit Wrapper WebApp</title>
+    <link href="https://fonts.googleapis.com/css?family=PT Sans" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'PT Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .article {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+
+        .article h2 {
+            margin: 0;
+        }
+
+        .article p {
+            margin: 5px 0;
+        }
+
+        .article span {
+            color: grey
+        }
+
+        .article a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        @media screen and (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            .article {
+                padding: 8px;
+            }
+
+            .article h2 {
+                font-size: 1.2rem;
+            }
+
+            .article p {
+                font-size: 0.9rem;
+            }
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-container input {
+            padding: 8px;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Reddit Wrapper WebApp</h1>
+        <div class="search-container">
+            <input type="text" id="subreddit-input" placeholder="Enter subreddit name"
+                onkeydown="handleEnterKey(event)" />
+            <button onclick="fetchArticles()">Search</button>
+        </div>
+        <div id="articles-container"></div>
+    </div>
+
+    <script>
+        function handleEnterKey(event) {
+            if (event.key === "Enter") {
+                fetchArticles();
+            }
+        }
+
+        async function fetchArticles() {
+            const subredditInput = document.getElementById('subreddit-input').value;
+
+            if (!subredditInput) return;
+
+            const articlesContainer = document.getElementById('articles-container');
+            articlesContainer.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/subreddit/${subredditInput}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if(data.length == 0) {
+                        articlesContainer.innerHTML = `<p>Error: Failed to fetch</p>`;
+                        return;
+                    }
+                    console.log(data);
+                    articlesContainer.innerHTML = '';
+
+                    data.forEach((article) => {
+                        const articleElement = document.createElement('div');
+                        articleElement.classList.add('article');
+
+                        articleElement.innerHTML = `
+                            <h2>${article.title}</h2>
+                            <p>Author: <span>${article.author}</span></p>
+                            <p>Creation Date: ${new Date(article.created_utc * 1000).toLocaleString()}</p>
+                            <a href="${article.url}" target="_blank">Read More...</a>
+                        `;
+
+                        articlesContainer.appendChild(articleElement);
+                    });
+
+                } else {
+                    const articlesContainer = document.getElementById('articles-container');
+                    articlesContainer.innerHTML = `<p>Error: Subreddit not found.</p>`;
+                }
+            }
+            catch (e) {
+                articlesContainer.innerHTML = `<p>Error: ${e.message}</p>`;
+            }
+        }
+    </script>
+</body>
+
+</html>
