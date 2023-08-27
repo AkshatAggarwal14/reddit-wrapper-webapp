@@ -103,7 +103,7 @@
             articlesContainer.innerHTML = '<p>Loading...</p>';
 
             try {
-                const response = await fetch(`http://127.0.0.1:8000/subreddit/${subredditInput}`);
+                const response = await fetch(`https://reddit-wrapper.onrender.com/subreddit/${subredditInput}`);
 
                 if (response.ok) {
                     const data = await response.json();
